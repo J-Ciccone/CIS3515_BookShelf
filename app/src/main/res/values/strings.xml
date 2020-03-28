@@ -1,0 +1,42 @@
+<resources>
+    <string name="app_name">BookShelf</string>
+
+    <string-array name="bookTitles">
+        <item>Stone the Pet Rock</item>
+        <item>God Chose You For a Reason</item>
+        <item>Jesus reborn</item>
+        <item>My Life in Words</item>
+        <item>The Tail of Two Kitties</item>
+        <item>Gut Microbiome: The Forgotten Organ</item>
+        <item>Hola: Spanish for Beginners</item>
+        <item>Caitlyn Jenner: My Journey</item>
+        <item>Ol Iron Pegs: From Amputee to Champion</item>
+        <item>Closer to the Edge: The Science behind our Flat Earth</item>
+    </string-array>
+
+    <string-array name="bookAuthors">
+        <item>Stone Malone</item>
+        <item>Rick Bock</item>
+        <item>Adam Bensigner</item>
+        <item>Matt Wheeler</item>
+        <item>Adam Bornstein</item>
+        <item>Worgen Stugen</item>
+        <item>Peter Potter</item>
+        <item>Damien Lillard</item>
+        <item>Stimpy Williams</item>
+        <item>Gretchen Macaroni</item>
+    </string-array>
+
+    <string-array name="books">
+        <item>title1</item>
+        <item>title2</item>
+        <item>title3</item>
+        <item>title4</item>
+        <item>title5</item>
+        <item>title6</item>
+        <item>title7</item>
+        <item>title8</item>
+        <item>title9</item>
+        <item>title10</item>
+    </string-array>
+</resources>
