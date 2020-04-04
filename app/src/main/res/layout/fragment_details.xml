@@ -1,23 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".BookDetailsFragment"
-    android:orientation="vertical">
+    android:background="#FFFFFF">
+
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/bookTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center|top"
-        android:textSize="30sp">
-    </TextView>
+        android:textSize="30sp"
+        tools:text="Title"></TextView>
+
     <TextView
-        android:id="@+id/author"
+        android:id="@+id/bookAuthor"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textSize="20sp">
-    </TextView>
+        android:textSize="20sp"
+        tools:text="Author"></TextView>
+
+    <ImageView
+        android:id="@+id/coverImage"
+        android:layout_width="339dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        tools:layout_marginBottom="16dp"
+        tools:src="@tools:sample/avatars" />
 
 </LinearLayout>

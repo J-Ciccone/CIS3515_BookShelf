@@ -1,18 +1,9 @@
 <resources>
     <string name="app_name">BookShelf</string>
 
-    <string-array name="bookTitles">
-        <item>Stone the Pet Rock</item>
-        <item>God Chose You For a Reason</item>
-        <item>Jesus reborn</item>
-        <item>My Life in Words</item>
-        <item>The Tail of Two Kitties</item>
-        <item>Gut Microbiome: The Forgotten Organ</item>
-        <item>Hola: Spanish for Beginners</item>
-        <item>Caitlyn Jenner: My Journey</item>
-        <item>Ol Iron Pegs: From Amputee to Champion</item>
-        <item>Closer to the Edge: The Science behind our Flat Earth</item>
-    </string-array>
+    <string name="searchBar">
+        Search…
+    </string>
 
     <string-array name="bookAuthors">
         <item>Stone Malone</item>

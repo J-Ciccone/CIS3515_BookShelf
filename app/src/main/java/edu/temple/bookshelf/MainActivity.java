@@ -1,88 +1,186 @@
 package edu.temple.bookshelf;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
+
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
 
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+
+
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
-import java.util.HashMap;
+
 
 public class MainActivity extends AppCompatActivity implements BookListFragment.BookSelectedInterface {
-    public static final int NUMBOOKS = 10;
-    public static final String TITLE = "TITLE";
-    public static final String AUTHOR = "AUTHOR";
-    ArrayList<HashMap<String,String>> books;
-    String[] titles;
-    String[] authors;
-    HashMap<String,String>[] mapArray;
-    boolean twoPanes;
+    private boolean twoPanes;
+    private String searchUrl = "https://kamorris.com/lab/abp/booksearch.php?search=";
+
+    RequestQueue requestQueue;
+
+    final String BOOK_KEY = "BOOK_Key";
+    final String BOOK_SELECTED ="BOOK_SELECTED";
+    final String SELECTED = "SELECTED";
+
+    FragmentTransaction fragmentTransaction;
+    FragmentManager fragmentManager;
+
+    boolean isSelected = false;
+
+    Button searchButton;
+    ArrayList<Book> books;
     BookDetailsFragment detailsFragment;
     BookListFragment listFragment;
+    int selectedPosition = 0;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        titles = getResources().getStringArray(R.array.bookTitles);
-        authors = getResources().getStringArray(R.array.bookAuthors);
-
+        searchButton = findViewById(R.id.searchButton);
         twoPanes = (findViewById(R.id.detailFrame) != null);
+        if(savedInstanceState != null){
+            books = (ArrayList<Book>)savedInstanceState.getSerializable(BOOK_KEY);
+            selectedPosition = savedInstanceState.getInt(BOOK_SELECTED);
+        }else{
+            books = new ArrayList<>();
+        }
 
-        books = generateBooks(titles,authors);
+        requestQueue = Volley.newRequestQueue(this);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentManager = getSupportFragmentManager();
+        fragmentTransaction = fragmentManager.beginTransaction();
 
-        listFragment = BookListFragment.newInstance(books);
+        if(savedInstanceState != null){
+            listFragment = BookListFragment.newInstance(books);
+            if(savedInstanceState.getBoolean(SELECTED)){
+                if(twoPanes){
+                    detailsFragment = BookDetailsFragment.newInstance(books.get(savedInstanceState.getInt(BOOK_SELECTED)));
+                    fragmentTransaction.add(R.id.detailFrame,detailsFragment)
+                        .add(R.id.bookFrame,listFragment).commit();
+                }else{
+                    detailsFragment = BookDetailsFragment.newInstance(books.get(savedInstanceState.getInt(BOOK_SELECTED)));
+                    fragmentTransaction.add(R.id.bookFrame,detailsFragment);
+                    fragmentTransaction.commit();
+                }
+            }else{
 
-        fragmentTransaction.add(R.id.bookFrame,listFragment);
-        fragmentTransaction.commit();
+            }
+        }else{
+            listFragment = BookListFragment.newInstance(books);
+            fragmentTransaction.add(R.id.bookFrame,listFragment);
+            fragmentTransaction.commit();
+        }
+
 
         if (twoPanes){
-            detailsFragment = new BookDetailsFragment();
+            if(savedInstanceState != null){
+                detailsFragment = BookDetailsFragment.newInstance(books.get(savedInstanceState.getInt(BOOK_SELECTED)));
+            }else {
+                detailsFragment = new BookDetailsFragment();
+            }
             fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.add(R.id.detailFrame, detailsFragment);
             fragmentTransaction.commit();
         }
 
+        searchButton.setOnClickListener(new View.OnClickListener(){
+        @Override
+        public void onClick(View v) {
 
-    }
-    public ArrayList<HashMap<String,String>> generateBooks(String[] titles, String[] authors){
-        ArrayList<HashMap<String,String>> booksArray = new ArrayList<>();
-        HashMap<String, String> book1 = new HashMap<>();
-        HashMap<String, String> book2 = new HashMap<>();
-        HashMap<String, String> book3 = new HashMap<>();
-        HashMap<String, String> book4 = new HashMap<>();
-        HashMap<String, String> book5 = new HashMap<>();
-        HashMap<String, String> book6 = new HashMap<>();
-        HashMap<String, String> book7 = new HashMap<>();
-        HashMap<String, String> book8 = new HashMap<>();
-        HashMap<String, String> book9 = new HashMap<>();
-        HashMap<String, String> book10 = new HashMap<>();
+            TextView bookRequest = findViewById(R.id.bookSearch);
+            if(!twoPanes){
+                isSelected = false;
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                transaction.addToBackStack(null).replace(R.id.bookFrame, listFragment);
+                transaction.commit();
+            }
+            String query = searchUrl + bookRequest.getText().toString();
+            JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(query,
+                    new Response.Listener<JSONArray>() {
+                        @Override
+                        public void onResponse(JSONArray response) {
+                            books.clear();
+                            try{
+                                ArrayList<Book> newBooks= new ArrayList<>();
+                                // Loop through the array elements
+                                for(int i=0;i<response.length();i++){
+                                    // Get current json object
+                                    JSONObject book = response.getJSONObject(i);
 
-        HashMap<String, String>[] mapArray = new HashMap[]{book1, book2, book3, book4, book5, book6, book7, book8, book9, book10};
+                                    // Get the current student (json object) data
+                                    int id = book.getInt("book_id");
+                                    String title = book.getString("title");
+                                    String author = book.getString("author");
+                                    String imgUrl = book.getString("cover_url");
+                                    Book tempBook = new Book(id,title,author,imgUrl);
+                                    books.add(tempBook);
+                                }
+                                listFragment.updateBooks(books);
 
-        for(int i = 0; i < NUMBOOKS ; i++){
-            mapArray[i].put(TITLE, titles[i]);
-            mapArray[i].put(AUTHOR, authors[i]);
-            booksArray.add(mapArray[i]);
+                            }catch (JSONException e){
+                                e.printStackTrace();
+                            }
+
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(MainActivity.this,error.toString(),Toast.LENGTH_LONG).show();
+                            System.out.println(error.toString());
+                        }
+                    });
+
+            requestQueue.add(jsonArrayRequest);
+
         }
-        return booksArray;
-    }
+
+
+    });
+
+}
+
+
     @Override
     public void bookSelected(int position) {
-        HashMap<String,String> book = books.get(position);
+        selectedPosition = position;
+        isSelected = true;
+        Book book = books.get(position);
         if(twoPanes) {
-            detailsFragment.updateText(book.get(TITLE),book.get(AUTHOR));
+            detailsFragment.update(book.getTitle(),book.getAuthor(), book.getCoverUrl());
         } else {
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction transaction = fragmentManager.beginTransaction();
-            Fragment newFrag = BookDetailsFragment.newInstance(book);
-            transaction.addToBackStack(null).replace(R.id.bookFrame, newFrag);
+            transaction.addToBackStack(null).replace(R.id.bookFrame, BookDetailsFragment.newInstance(book));
             transaction.commit();
         }
 
     }
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putSerializable(BOOK_KEY,books);
+        outState.putInt(BOOK_SELECTED, selectedPosition);
+        outState.putBoolean(SELECTED,isSelected);
+        super.onSaveInstanceState(outState);
+    }
+
 }

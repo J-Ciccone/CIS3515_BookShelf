@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
     <ListView
-        android:id="@+id/list"
-        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/bookList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".BookListFragment">
-    </ListView>
+        android:visibility="visible"
+        tools:context=".BookListFragment"
+        />
+
+
 
 </LinearLayout>

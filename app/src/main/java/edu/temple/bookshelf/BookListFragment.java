@@ -14,9 +14,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class BookListFragment extends Fragment {
-
+    private View fragView;
     private BookSelectedInterface bookSelectedInterface;
-    private ArrayList<HashMap<String,String>> books;
+    private ArrayList<Book> books;
+    ListView listView;
+    BookAdapter bookAdapter;
 
     private final static String BOOKS = "BOOKS";
 
@@ -26,7 +28,7 @@ public class BookListFragment extends Fragment {
     public BookListFragment() {
         // Required empty public constructor
     }
-    public static BookListFragment newInstance(ArrayList<HashMap<String,String>> books) {
+    public static BookListFragment newInstance(ArrayList<Book> books) {
         BookListFragment newBookListFragment = new BookListFragment();
         Bundle bundle = new Bundle();
         bundle.putSerializable(BOOKS, books);
@@ -50,7 +52,7 @@ public class BookListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
         if( bundle != null) {
-            books = (ArrayList<HashMap<String,String>>)bundle.get(BOOKS);
+            books = (ArrayList<Book>)bundle.get(BOOKS);
         }
     }
 
@@ -58,13 +60,11 @@ public class BookListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View fragView = inflater.inflate(R.layout.fragment_list, container, false);
-
-        BookAdapter bookAdapter = new BookAdapter(this.getContext(), books);
-
-        ListView listView = fragView.findViewById(R.id.list);
+        fragView = inflater.inflate(R.layout.fragment_list, container, false);
+        bookAdapter = new BookAdapter(getContext(),books);
+        listView = fragView.findViewById(R.id.bookList);
         if(listView.getParent() != null) {
-            ((ViewGroup)listView.getParent()).removeView(fragView); // <- fix
+            ((ViewGroup)listView.getParent()).removeView(fragView);
         }
         listView.setAdapter(bookAdapter);
 
@@ -75,8 +75,16 @@ public class BookListFragment extends Fragment {
             }
         });
 
+
         return fragView;
     }
+
+    public void updateBooks(ArrayList<Book> newBooks){
+        books = newBooks;
+        listView.setAdapter(new BookAdapter(this.getContext(), books));
+    }
+
+
 
 
 }
