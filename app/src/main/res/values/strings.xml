@@ -5,5 +5,7 @@
     <string name="stop_audio">Stop</string>
     <string name="pause_audio">Pause</string>
     <string name="play_button">Play</string>
+    <string name="now_playing">Now Playing -</string>
+    <string name="pause_playing">Paused -</string>
 </resources>
 

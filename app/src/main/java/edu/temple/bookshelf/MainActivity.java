@@ -36,14 +36,16 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
 
     private static final String BOOKS_KEY = "books";
     private static final String SELECTED_BOOK_KEY = "selectedBook";
-    private static final String NOW_PLAYING = "- Now Playing";
-
+    private static final Boolean PLAYING = true;
+    private static final Boolean PAUSED = false;
 
     FragmentManager fm;
 
     int duration;
 
     boolean twoPane;
+    boolean playWasClicked;
+
     BookListFragment bookListFragment;
     BookDetailsFragment bookDetailsFragment;
 
@@ -135,21 +137,32 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                 if(connected){
                     if(mediaControlBinder.isPlaying()){
                         mediaControlBinder.pause();
+                        if(selectedBook != null){
+                            updatePlayStatus(bookDetailsFragment,PAUSED);
+                        }
                     }else{
-
+                        mediaControlBinder.pause();
+                        if(selectedBook != null){
+                            if(playWasClicked){
+                                bookDetailsFragment.titleTextView.setText(R.string.now_playing);
+                                bookDetailsFragment.titleTextView.append(selectedBook.getTitle());
+                            }
+                        }
                     }
-
                 }
             }
         });
-
-
 
         findViewById(R.id.stopAudioButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(connected){
+                    playWasClicked = false;
                     mediaControlBinder.stop();
+                    if(selectedBook!=null){
+                        bookDetailsFragment.titleTextView.setText(selectedBook.getTitle());
+                        mediaSeekBar.setProgress(0);
+                    }
                 }
             }
         });
@@ -201,8 +214,9 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                     .commit();
         } else {
             if (selectedBook != null) {
+                bookDetailsFragment = BookDetailsFragment.newInstance(selectedBook);
                 fm.beginTransaction()
-                        .replace(R.id.container1, BookDetailsFragment.newInstance(selectedBook))
+                        .replace(R.id.container1, bookDetailsFragment)
                         // Transaction is reversible
                         .addToBackStack(null)
                         .commit();
@@ -273,8 +287,9 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             /*
             Display book using new fragment
              */
+            bookDetailsFragment = BookDetailsFragment.newInstance(selectedBook);
             fm.beginTransaction()
-                    .replace(R.id.container1, BookDetailsFragment.newInstance(selectedBook))
+                    .replace(R.id.container1, bookDetailsFragment)
                     // Transaction is reversible
                     .addToBackStack(null)
                     .commit();
@@ -284,10 +299,14 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
     @Override
     public void playButtonClicked(int id) {
         if(connected){
+            playWasClicked = true;
             mediaControlBinder.play(id);
             mediaControlBinder.setProgressHandler(mediaControlHandler);
-        }
+            if(selectedBook !=null){
+                updatePlayStatus(bookDetailsFragment, PLAYING );
+            }
 
+        }
     }
 
     @Override
@@ -297,5 +316,15 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         // Save previously searched books as well as selected book
         outState.putParcelableArrayList(BOOKS_KEY, books);
         outState.putParcelable(SELECTED_BOOK_KEY, selectedBook);
+    }
+
+    public void updatePlayStatus(BookDetailsFragment detailsFragment, boolean playing) {
+        if(playing) {
+            detailsFragment.titleTextView.setText(R.string.now_playing);
+            detailsFragment.titleTextView.append(selectedBook.getTitle());
+        }else {
+            detailsFragment.titleTextView.setText(R.string.pause_playing);
+            detailsFragment.titleTextView.append(selectedBook.getTitle());
+        }
     }
 }

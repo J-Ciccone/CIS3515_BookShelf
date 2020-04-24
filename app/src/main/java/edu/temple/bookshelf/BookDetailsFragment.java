@@ -76,14 +76,9 @@ public class BookDetailsFragment extends Fragment {
         we don't try to display a book if one isn't provided
          */
         if (book != null){
+
             displayBook(book);
-            playButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    parent.playButtonClicked(book.getId());
-                    titleTextView.append("- Now Playing");
-                }
-            });
+
         }
 
         return v;
@@ -94,8 +89,16 @@ public class BookDetailsFragment extends Fragment {
     to display a book
      */
     public void displayBook(Book book) {
-        titleTextView.setText(book.getTitle());
-        authorTextView.setText(book.getAuthor());
+        final Book newBook = book;
+        titleTextView.setText(newBook.getTitle());
+        authorTextView.setText(newBook.getAuthor());
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                parent.playButtonClicked(newBook.getId());
+
+            }
+        });
         // Picasso simplifies image loading from the web.
         // No need to download separately.
         Picasso.get().load(book.getCoverUrl()).into(coverImageView);
