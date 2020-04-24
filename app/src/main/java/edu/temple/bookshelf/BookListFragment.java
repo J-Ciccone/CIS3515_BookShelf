@@ -2,89 +2,95 @@ package edu.temple.bookshelf;
 
 import android.content.Context;
 import android.os.Bundle;
+
+import androidx.fragment.app.Fragment;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
-
-import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class BookListFragment extends Fragment {
-    private View fragView;
-    private BookSelectedInterface bookSelectedInterface;
+
+    private static final String BOOK_LIST_KEY = "booklist";
     private ArrayList<Book> books;
-    ListView listView;
-    BookAdapter bookAdapter;
+    private ListView listView;
 
-    private final static String BOOKS = "BOOKS";
+    private BookSelectedInterface parentActivity;
 
-    interface BookSelectedInterface {
-        void bookSelected(int position);
-    }
-    public BookListFragment() {
-        // Required empty public constructor
-    }
+    public BookListFragment() {}
+
     public static BookListFragment newInstance(ArrayList<Book> books) {
-        BookListFragment newBookListFragment = new BookListFragment();
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(BOOKS, books);
-        newBookListFragment.setArguments(bundle);
-        return newBookListFragment;
+        BookListFragment fragment = new BookListFragment();
+        Bundle args = new Bundle();
+
+        /*
+         A Book implements the Parcelable interface
+         therefore we can place an arraylist of books
+         inside a bundle by using that put() method.
+         */
+        args.putParcelableArrayList(BOOK_LIST_KEY, books);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
-    public void onAttach(Context context) throws RuntimeException {
+    public void onAttach(Context context) {
         super.onAttach(context);
 
-        if(context instanceof BookSelectedInterface) {
-            bookSelectedInterface = (BookSelectedInterface)context;
+        /*
+         This fragment needs to communicate with its parent activity
+         so we verify that the activity implemented our known interface
+         */
+        if (context instanceof BookSelectedInterface) {
+            parentActivity = (BookSelectedInterface) context;
         } else {
-            throw new RuntimeException(getContext() + "must implement BookSelectedInterface");
+            throw new RuntimeException("Please implement the required interface(s)");
         }
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle bundle = getArguments();
-        if( bundle != null) {
-            books = (ArrayList<Book>)bundle.get(BOOKS);
+        books = new ArrayList<Book>();
+        if (getArguments() != null) {
+            books.addAll((ArrayList) getArguments().getParcelableArrayList(BOOK_LIST_KEY));
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        fragView = inflater.inflate(R.layout.fragment_list, container, false);
-        bookAdapter = new BookAdapter(getContext(),books);
-        listView = fragView.findViewById(R.id.bookList);
-        if(listView.getParent() != null) {
-            ((ViewGroup)listView.getParent()).removeView(fragView);
-        }
-        listView.setAdapter(bookAdapter);
+        listView = (ListView) inflater.inflate(R.layout.fragment_list, container, false);
+
+        listView.setAdapter(new BookAdapter(getContext(), books));
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                bookSelectedInterface.bookSelected(position);
+                parentActivity.bookSelected(position);
             }
         });
 
-
-        return fragView;
+        return listView;
     }
 
-    public void updateBooks(ArrayList<Book> newBooks){
-        books = newBooks;
-        listView.setAdapter(new BookAdapter(this.getContext(), books));
+    public void updateBooksDisplay(ArrayList<Book> books) {
+        this.books.clear();
+        this.books.addAll(books);
+        ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
     }
 
-
-
-
+    /*
+    Interface for communicating with attached activity
+     */
+    interface BookSelectedInterface {
+        void bookSelected(int index);
+    }
 }
