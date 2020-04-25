@@ -20,17 +20,20 @@ import java.util.HashMap;
 public class BookDetailsFragment extends Fragment {
 
     private static final String BOOK_KEY = "book";
+    private static final String PLAYING = "playing";
     private Book book;
+    private boolean play;
 
     TextView titleTextView, authorTextView;
     ImageView coverImageView;
     Button playButton;
 
+
     PlayButtonInterface parent;
 
     public BookDetailsFragment() {}
 
-    public static BookDetailsFragment newInstance(Book book) {
+    public static BookDetailsFragment newInstance(Book book,boolean play) {
         BookDetailsFragment fragment = new BookDetailsFragment();
         Bundle args = new Bundle();
 
@@ -40,6 +43,7 @@ public class BookDetailsFragment extends Fragment {
          by using that put() method.
          */
         args.putParcelable(BOOK_KEY, book);
+        args.putBoolean(PLAYING, play);
         fragment.setArguments(args);
         return fragment;
     }
@@ -51,6 +55,7 @@ public class BookDetailsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             book = (Book) getArguments().getParcelable(BOOK_KEY);
+            play = getArguments().getBoolean(PLAYING);
         }
     }
 
@@ -64,11 +69,11 @@ public class BookDetailsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_details, container, false);
-
         titleTextView = v.findViewById(R.id.titleTextView);
         authorTextView = v.findViewById(R.id.authorTextView);
         coverImageView = v.findViewById(R.id.coverImageView);
         playButton = v.findViewById(R.id.playButton);
+
 
         /*
         Because this fragment can be created with or without
@@ -90,7 +95,13 @@ public class BookDetailsFragment extends Fragment {
      */
     public void displayBook(Book book) {
         final Book newBook = book;
-        titleTextView.setText(newBook.getTitle());
+        if(play){
+            titleTextView.setText(R.string.now_playing);
+            titleTextView.append(newBook.getTitle());
+        }else{
+            titleTextView.setText(newBook.getTitle());
+        }
+
         authorTextView.setText(newBook.getAuthor());
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
