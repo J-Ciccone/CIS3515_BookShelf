@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
     FragmentManager fm;
 
     int duration;
+    int bookPlayingId;
 
     boolean twoPane;
     boolean playWasClicked;
@@ -167,8 +168,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                         mediaControlBinder.pause();
                         if(selectedBook != null){
                             if(playWasClicked){
-                                bookDetailsFragment.titleTextView.setText(R.string.now_playing);
-                                bookDetailsFragment.titleTextView.append(selectedBook.getTitle());
+                                updatePlayStatus(bookDetailsFragment,PLAYING);
                             }
                         }
                     }
@@ -330,11 +330,13 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
     @Override
     public void playButtonClicked(int id) {
         if(connected){
-            if(mediaControlBinder.isPlaying()){
+            if((mediaControlBinder.isPlaying() && bookPlayingId != id) || (!mediaControlBinder.isPlaying() && bookPlayingId != id)){
                 stopButton.callOnClick();
                 startService(bindIntent);
+                mediaControlBinder.play(id);
                 playWasClicked = true;
             }else{
+                bookPlayingId = id;
                 startService(bindIntent);
                 playWasClicked = true;
                 if(mediaSeekBar.getProgress() == 0){
